@@ -1,0 +1,173 @@
+<html><!--クラス文を使う必要はあっただろうか、いやない(反語)--><!--汚コード注意-->
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{background:#333;}input,select{appearance:none;-webkit-appearance:none;}input,textarea,select{background:#111;color:#00BB00;font-size:17px;border:1px #00BB00 solid;}
+#btn0,#btn1{background:#222;color:#00BB00;font-size:17px;border:1px #00BB00 solid;padding:1px;}
+.txt,#show0,#show1,h3{color:#00BB00;font-weight:bolder;}
+#win0,#win1,#win2{background:#222;border:1px solid #00BB00;margin:5px;padding:8px;width:fit-content;}
+.msg{color:#00BB00;}
+</style>
+</head>
+<body>
+<div id="win0"><h3 id="win0trigger">進数変換</h3><input id="num_" type="text" value=""><br>
+  <p><select id="num0"><option></option><option value="2">2</option><option value="8">8</option><option value="10">10</option><option value="16">16</option></select><span class="txt">進数</span><span class="txt">→</span>
+    <select id="num1"><option></option><option value="2">2</option><option value="8">8</option><option value="10">10</option><option value="16">16</option></select><span class="txt">進数</span>&ensp;<span id="btn0" onclick="calc()">変換</span>
+  </p><h2 id="show0"></h2>
+</div>
+
+<div id="win1"><h3 id="win1trigger">モールス変換</h3><textarea rows="5" id="num2"></textarea><p></p>
+  <select id="num3"><option></option><option value="jp">日本語(かな)</option><option value="zh">中文(简体字・繁體字)</option><option value="en">English</option></select>
+  &ensp;<span id="btn1" onclick="translateMorse()">変換</span><p class="msg">※略符号不可<br>実装中</p><h2 id="show1"></h2>
+</div>
+
+<div id="win2"><h3 id="win2trigger">実装中</h3>
+</div>
+
+<script>let testStr="0123456";/*テスト用*//*大文字と小文字を区別しない->未実装*/
+    /*進数変換用クラス=============*/
+    let CalcBase=class{/*constructor(num,to){this.num=num;this.to=to;}*/
+      calc_(){function constructorFnc(num,to){this.num=num;/*元となる数*/this.to=to;/*何進数に変換するか*/}/*コンストラクタ代わりの関数*/
+        let btn0=document.getElementById("btn0");btn0.animate([{background:"#00BB00",color:"#000",boxShadow:"0 0 0 3px #00BB00",},{color:"#00BB00",},],400,);/*btnアニメーション*/
+        let num_=document.getElementById("num_").value;let num0=document.getElementById("num0").value;let num1=document.getElementById("num1").value;
+        let al=["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];/*alphabet*/
+        let to2=new constructorFnc(num_,2);let to8=new constructorFnc(num_,8);let to10=new constructorFnc(num_,10);let to16=new constructorFnc(num_,16);let f2to8=new constructorFnc(num_,3);let f2to16=new constructorFnc(num_,4);
+        /*let to2=new CalcBase(num_,2);let to8=new CalcBase(num_,8);let to10=new CalcBase(num_,10);let to16=new CalcBase(num_,16);let f2to8=new CalcBase(num_,3);let f2to16=new CalcBase(num_,4);*/
+        let remainder;/*余り*/let list=[];let tmpLs=[];let empStr="";let splitNm;let result;let result_;function delX(x,x_){return x.replace(x_,'');}/*先頭の0を削除*/console.log(delX(testStr,"0"));
+        function calcTo2(n_,t_){/*2,8進数に変換*/
+          function loopTo2(){remainder=Math.floor(n_%t_);list.push(remainder);n_=Math.floor(n_/t_);/*ここではn_にn_/t_の結果を代入*/
+            if(Math.floor(n_/t_)==0){remainder=Math.floor(n_%t_);list.push(remainder);result_=list.reverse();result=result_.join("");}
+          }if(n_>1){while(Math.floor(n_/t_)!=0){loopTo2();}}else{loopTo2();}/*値が1より大きい場合*/
+        };function calc8to2(){splitNm=num_.split("");let i=0;
+            while(i!=num_.length){calcTo2(Number(splitNm[i]),to2.to);tmpLs.push(result);if(i>0&&tmpLs[i].length<=2){tmpLs[i]=0+tmpLs[i];}result=0;result_=0;list=[];i++;/*3bit単位で考える. 例えば13を変換した際ログでは01,11となるが001,011となるのが理想*/
+              /*先頭以外の配列は3bitで揃えるために2桁のとき頭に0を追加する. 変数による汚染を防ぐため共通のものを初期化.*/
+            }if(tmpLs[0][0]==0){tmpLs[0]=delX(tmpLs[0],"0");}result=tmpLs.join("");/*配列の先頭の文字列の先頭が0だった場合0削除.*/
+        };function calc16to10(){splitNm=num_.split("");let i=0;result=0;splitNm.reverse();/*16進数を1文字ずつ分割,配列に格納. 配列の値の順番を逆にする.*/
+            /*配列内をループし、内部でアルファベットを10進数の値に置き換える. spliceで配列内のアルファベットを数値に置換.*/
+            while(i!=to16.num.length){if(splitNm[i]==al[0]){splitNm.splice(i,1,10);}else if(splitNm[i]==al[1]){splitNm.splice(i,1,11);}else if(splitNm[i]==al[2]){splitNm.splice(i,1,12);}else if(splitNm[i]==al[3]){splitNm.splice(i,1,13);}
+              else if(splitNm[i]==al[4]){splitNm.splice(i,1,14);}else if(splitNm[i]==al[5]){splitNm.splice(i,1,15);}else{splitNm.splice(i,1,Number(splitNm[i]));}result_=(16**i)*splitNm[i];result+=result_;i++;
+            }/*リスト内で16進数を分割した後それぞれの値に16のi乗の重みをかける*/
+        };function calc2to(n_,t_){let i=0;let j=n_.length-1;result=0;result_=0;while(i<=(n_.length-1)){result_=n_[i]*(2**j);result+=result_;j--;i++;}}
+        function calc2to8(n_,t_){let assocChil=[];let shortage;let h=0;let m=0;
+          function f2loop(){while(h<n_.length){assocChil.push(n_[h]);h++;}let assocArr={};let tmpLs_=[];assocChil.reverse();let tmpResult=0;let tmpResult0=0;let result_=[];let i=0;let j=0;let k=0;let l=0;
+            while(k<assocChil.length){if(i==t_){i=0;}tmpResult=assocChil[k]*(2**i);tmpLs.push(tmpResult);
+              if((j>=t_)&&(tmpLs.length%t_==0)){/**/
+                while(l<t_){tmpResult0+=tmpLs[l];
+                  if(t_==4){if(tmpResult0==10){tmpResult0=al[0];}else if(tmpResult0==11){tmpResult0=al[1];}else if(tmpResult0==12){tmpResult0=al[2];}
+                    else if(tmpResult0==13){tmpResult0=al[3];}else if(tmpResult0==14){tmpResult0=al[4];}else if(tmpResult0==15){tmpResult0=al[5];}
+                  }if(l==(t_-1)){assocArr["tmpLs"+k]=tmpResult0;result_.push(assocArr["tmpLs"+k]);tmpResult0=0;}l++;/*配列から値だけ取り出す. 初期化.*/
+                }l=0;tmpLs=[];
+              }i++;j+=t_;k++;
+            }result_.reverse();result=result_.join("");
+          }if(n_.length%t_!=0){shortage=((Math.floor(n_.length/t_)*t_)+t_)-n_.length;for(m; m<shortage; m++){empStr+=0;}n_=empStr+n_;f2loop();}else{f2loop();}/*配列の桁が足りない場合先頭に不足分の0を足す*/
+        };let DetectUnExpVal=class{constructor(dNmVal,dNum,dRange){this.dNmVal=dNmVal;this.dNum=dNum;this.dRange=dRange}/*入力された値. 何進数か. 範囲.*/
+            /*関数内でループ, i回目の値が決められた値を超えている若しくは文字列の場合false*/
+            dLoop(dArg0,dArg1){let i=0;while(i<dArg0.length){if(Number(dArg0[i])>dArg1||isNaN(Number(dArg0[i]))){return false;}i++;}}
+            dLoopDa(dArg0,dArg1){let i=0;while(i<dArg0.length){if(Number(dArg0[i])>dArg1){return false;}if(isNaN(dArg0[i])&&(dArg0[i]!=al[0]&&dArg0[i]!=al[1]&&dArg0[i]!=al[2]&&dArg0[i]!=al[3]&&dArg0[i]!=al[4]&&dArg0[i]!=al[5])){return false;}i++;}}/*detect alphabet 16進数用*/
+            detect(){let selfDLoop=this.dLoop(this.dNmVal,this.dRange);let selfDLoopDa=this.dLoopDa(this.dNmVal,this.dRange);if(this.dNum==2){selfDLoop;}else if(this.dNum==8){selfDLoop;}else if(this.dNum==10){selfDLoop;}else if(this.dNum==16){selfDLoopDa;}
+              /*クラス自身が持つ関数を利用するための変数. 2進数から変換する場合,8進数から変換する場合,10進数から変換する場合.*/
+              if((this.dNum!=16)&&(selfDLoop==false)){alert("Unexpected Value");return false;}if((this.dNum>=16)&&(selfDLoopDa==false)){alert("Unexpected Value");return false;}
+            }/**/
+        };let detectUnExpVal2=new DetectUnExpVal(num_,2,1);let detectUnExpVal8=new DetectUnExpVal(num_,8,7);let detectUnExpVal10=new DetectUnExpVal(num_,10,11);let detectUnExpVal16=new DetectUnExpVal(num_,16,11);
+        function calc8to10(){calc8to2();let tmpResult1=result;result=0;result_=[];list=[];tmpLs=[];calc2to(tmpResult1,to10.to);}function calc8to16(){calc8to2();let tmpResult1=result;result=0;result_=[];list=[];tmpLs=[];calc2to8(tmpResult1,f2to16.to);}
+        function calc10to16(){calcTo2(to2.num,to2.to);let tmpResult1=result;result=0;result_=[];list=[];tmpLs=[];calc2to8(tmpResult1,f2to16.to);}function rm0(){if(result[0]==0){result=delX(result,"0");}}
+        if((num_&&num1)!=(null||"")){
+          if(num0==num1){if(num0==2&&detectUnExpVal2.detect()!=false){result=num_}else if(num0==8&&detectUnExpVal8.detect()!=false){result=num_}else if(num0==10&&detectUnExpVal10.detect()!=false){result=num_;}else if(num0==16&&detectUnExpVal16.detect()!=false){result=num_;}}
+          else if(num1==to2.to){/*2進数に変換*/if(num0==10){calcTo2(to2.num,to2.to);rm0();}else if(num0==8){if(detectUnExpVal8.detect()!=false){calc8to2();}else{}}else if(num0==16){calc16to10();calcTo2(result,to2.to);rm0();}/*16進数を10進数に変換後2進数に変換*/}
+          else if(num1==to8.to){/*8進数に変換*/if(num0==2){if(detectUnExpVal2.detect()!=false){calc2to8(f2to8.num,f2to8.to);}}else if(num0==10){calcTo2(to8.num,to8.to);}else if(num0==16){calc16to10();calcTo2(result,to8.to);}}
+          else if(num1==to10.to){/*10進数に変換*/if(num0==2){if(detectUnExpVal2.detect()!=false){calc2to(to10.num,to10.to);}}else if(num0==8){if(detectUnExpVal8.detect()!=false){calc8to10();}}else if(num0==16){calc16to10();}}
+          else if(num1==to16.to){/*16進数に変換*/if(num0==2){if(detectUnExpVal2.detect()!=false){calc2to8(f2to16.num,f2to16.to);}}/*ここでは16進数に変換する処理*/else if(num0==8){if(detectUnExpVal8.detect()!=false){calc8to16();}}else if(num0==10){calc10to16();}}/*8進数を2進数に変換後16進数に変換. 10to16.*/
+          document.getElementById("show0").innerHTML=result;
+        }else{alert("error");}
+      }
+    };let base=new CalcBase();function calc(){base.calc_();}
+
+    /*モールス変換用クラス==========*/
+    let MorseTranslator=class{/*constructor(lang){this.lang=lang;}*/
+      morseTranslator(){function constructorFnc(lang){this.lang=lang;}let btn1=document.getElementById("btn1");btn1.animate([{background:"#00BB00",color:"#000",boxShadow:"0 0 0 3px #00BB00",},{color:"#00BB00",},],400);/*btnアニメーション*/
+        let numMc={"n0":[1,1,1,1,1],"n1":[0,1,1,1,1],"n2":[0,0,1,1,1],"n3":[0,0,0,1,1],"n4":[0,0,0,0,1],"n5":[0,0,0,0,0],"n6":[1,0,0,0,0],"n7":[1,1,0,0,0],"n8":[1,1,1,0,0],"n9":[1,1,1,1,0]}/*共通*/
+        let jp={"あ":[1,1,0,1,1],"い":[0,1],"う":[0,0,1],"え":[1,0,1,1,1],"お":[0,1,0,0,0],"ぁ":[1,1,0,1,1],"ぃ":[0,1],"ぅ":[0,0,1],"ぇ":[1,0,1,1,1],"ぉ":[0,1,0,0,0],"か":[0,1,0,0],"き":[1,0,1,0,0],"く":[0,0,0,1],"け":[1,0,1,1],"こ":[1,1,1,1],
+         "さ":[1,0,1,0,1],"し":[1,1,0,1,0],"す":[1,1,1,0,1],"せ":[0,1,1,1,0],"そ":[1,1,1,0],"た":[1,0],"ち":[0,0,1,0],"つ":[0,1,1,0],"っ":[0,1,1,0],"て":[0,1,0,1,1],"と":[0,0,1,0,0],"な":[0,1,0],"に":[1,0,1,0],"ぬ":[0,0,0,0],"ね":[1,1,0,1],"の":[0,0,1,1],
+         "は":[1,0,0,0],"ひ":[1,1,0,0,1],"ふ":[1,1,0,0],"へ":[0],"ほ":[1,0,0],"ま":[1,0,0,1],"み":[0,0,1,0,1],"む":[1],"め":[1,0,0,0,1],"も":[1,0,0,1,0],"や":[0,1,1],"ゆ":[1,0,0,1,1],"よ":[1,1],"ゃ":[0,1,1],"ゅ":[1,0,0,1,1],"ょ":[1,1],
+         "ら":[0,0,0],"り":[1,1,0],"る":[1,0,1,1,0],"れ":[1,1,1],"ろ":[0,1,0,1],"わ":[1,0,1],"ゐ":[0,1,0,0,1],"を":[0,1,1,1],"ゑ":[0,1,1,0,0],"ん":[0,1,0,1,0],"が":[0,1,0,0,"_",0,0],"ぎ":[1,0,1,0,0,"_",0,0],"ぐ":[0,0,0,1,"_",0,0],"げ":[1,0,1,1,"_",0,0],"ご":[1,1,1,1,"_",0,0],
+         "ざ":[1,0,1,0,1,"_",0,0],"じ":[1,1,0,1,0,"_",0,0],"ず":[1,1,1,0,1,"_",0,0],"ぜ":[0,1,1,1,0,"_",0,0],"ぞ":[1,1,1,0,"_",0,0],"だ":[1,0,"_",0,0],"ぢ":[0,0,1,0,"_",0,0],"づ":[0,1,1,0,"_",0,0],"で":[0,1,0,1,1,"_",0,0],"ど":[0,0,1,0,0,"_",0,0],
+         "ば":[1,0,0,0,"_",0,0],"び":[1,1,0,0,1,"_",0,0],"ぶ":[1,1,0,0,"_",0,0],"べ":[0,"_",0,0],"ぼ":[1,0,0,"_",0,0],"ぱ":[1,0,0,0,"_",0,0,1,1,0],"ぴ":[1,1,0,0,1,"_",0,0,1,1,0],"ぷ":[1,1,0,0,"_",0,0,1,1,0],"ぺ":[0,"_",0,0,1,1,0],"ぽ":[1,0,0,"_",0,0,1,1,0],"ー":[0,1,1,0,1],
+         "、":[],"。":[],"「":[],"」":[],"（":[],"）":[],"":[]
+        };let en={"a":[0,1],"b":[1,0,0,0],"c":[1,0,1,0],"d":[1,0,0],"e":[0],"f":[0,0,1,0],"g":[1,1,0],"h":[0,0,0,0],"i":[0,0],"j":[0,1,1,1],"k":[1,0,1],"l":[0,1,0,0],"m":[1,1],"n":[1,0],"o":[1,1,1],"p":[0,1,1,0],"q":[1,1,0,1],"r":[0,1,0],"s":[0,0,0],"t":[1],"u":[0,0,1],
+         "v":[0,0,0,1],"w":[0,1,1],"x":[1,0,0,1],"y":[1,0,1,1],"z":[1,1,0,0],",":[],".":[]
+        };let mendokusai="因为太麻烦，我没做。\n因為太麻煩，我沒做。\nめんどくさいから実装してません。\nSince there are massive characters, I'm too lazy to code.";let num2=document.getElementById("num2").value;let num3=document.getElementById("num3").value;
+        let langJp=new constructorFnc("jp");let langEn=new constructorFnc("en");
+        let empLs=[];let tmpResult;
+        let result;
+
+        function strLoopJp(){
+          for(let i=0;i<num2.length;i++){let n2i=num2[i];let m_={n0:n2i==0,n1:n2i==1,n2:n2i==2,n3:n2i==3,n4:n2i==4,n5:n2i==5,n6:n2i==6,n7:n2i==7,n8:n2i==8,n9:n2i==9}
+            if(m_.n0||m_.n1||m_.n2||m_.n3||m_.n4||m_.n5||m_.n6||m_.n7||m_.n8||m_.n9){empLs.push(numMc["n"+String(num2[i])]+"_");tmpResult=numMc["n"+String(num2[i])];}else{empLs.push(jp[num2[i]]+"_");tmpResult=jp[num2[i]];}
+          }
+          /*「0」「1」「_」「,」からなる文字列を・,ー,&emsp;のモールス信号に変換*/
+          let empResult=[];
+          for(let j=0;j<empLs.length;j++){for(let k=0;k<empLs[j].length;k++){if(empLs[j][k]==0){empResult+="・";}else if(empLs[j][k]==1){empResult+="ー";}else if(empLs[j][k]=="_"){empResult+="&emsp;";}else if(empLs[j][k]==","){empResult+="";}}}
+          result=empResult;
+        }
+        function strLoopEn(){
+          for(let i=0;i<num2.length;i++){let n2i=num2[i];let m_={n0:n2i==0,n1:n2i==1,n2:n2i==2,n3:n2i==3,n4:n2i==4,n5:n2i==5,n6:n2i==6,n7:n2i==7,n8:n2i==8,n9:n2i==9}
+            if(m_.n0||m_.n1||m_.n2||m_.n3||m_.n4||m_.n5||m_.n6||m_.n7||m_.n8||m_.n9){empLs.push(numMc["n"+String(num2[i])]+"_");tmpResult=numMc["n"+String(num2[i])];}else{empLs.push(en[num2[i]]+"_");tmpResult=en[num2[i]];}
+          }
+          /*「0」「1」「_」「,」からなる文字列を・,ー,&emsp;のモールス信号に変換*/
+          let empResult=[];
+          for(let j=0;j<empLs.length;j++){for(let k=0;k<empLs[j].length;k++){if(empLs[j][k]==0){empResult+="・";}else if(empLs[j][k]==1){empResult+="ー";}else if(empLs[j][k]=="_"){empResult+="&emsp;";}else if(empLs[j][k]==","){empResult+="";}}}
+          result=empResult;
+        }
+
+        if(num2!==(null||"")){
+          if(num2[0]=="・"||num2[0]=="ー"){/*先頭が「・」若しくは「ー」から始まる場合、モールス信号と判断*/
+            let empResult=[];
+            let morse2letter;
+            for(let l=0;l<num2.length;l++){
+              console.log(num2[l])
+              if(num2[l]=="・"){morse2letter=0}
+              else if(num2[l]=="ー"){morse2letter=1}
+              else if(num2[l]=="&emsp;"){morse2letter="_"}
+              console.log(morse2letter)
+            }
+            /*モールス信号を0,1,_からなる文字列に変換し、モールス変換用の関数(strLoopJpとstrLoopEn)内の配列を検索*/
+            /*一致した配列が存在すればキーを結果表示用の配列に格納*/
+            console.log("morse")
+          }/*モールスを解読*/
+          else{if(num3==langJp.lang){strLoopJp()}else if(num3==langEn.lang){strLoopEn()}else if(num3=="zh"){alert(mendokusai);}/*言語選択*/}/*モールスに変換*/
+          document.getElementById("show1").innerHTML=result;
+        }
+        console.log("morseMsg")//console.log(jp["あ"])//console.log(jp.あ)//console.log(numMc.n0)
+      }
+    };let morse=new MorseTranslator();function translateMorse(){morse.morseTranslator();}
+
+    /*ウィンドウ用クラス============*/
+    let win0=document.getElementById("win0");let win0trigger=document.getElementById("win0trigger");
+    let win1=document.getElementById("win1");let win1trigger=document.getElementById("win1trigger");
+    let win2=document.getElementById("win2");let win2trigger=document.getElementById("win2trigger");
+
+    let DraggableWin=class{constructor(winId,winTrig){this.winId=winId;this.winTrig=winTrig;}/*ウィンドウ番号,トリガー変数*/
+        winPc(){/*pc*/let winId_=this.winId;let winTrig_=this.winTrig;
+            winTrig_.onmousedown=function(ev){winId_.style.position="relative";function locationHandler(ev){winId_.style.left=(ev.pageX-winId_.offsetLeft/2)+"px";winId_.style.top=(ev.pageY-winId_.offsetTop/2)+"px";}/*マウス操作時の要素の位置*/
+              document.addEventListener("mousedown",locationHandler);document.addEventListener("mousemove",locationHandler);
+              document.addEventListener("mouseup",function(){document.removeEventListener("mousedown",locationHandler);document.removeEventListener("mousemove",locationHandler);})/*ドラッグ終了でハンドラ削除*/
+            }
+        }
+        winMb(){/*mobile*/let winId_=this.winId;let winTrig_=this.winTrig;winTrig_.addEventListener("touchmove",function(ev){winId_.style.position="relative";winId_.style.left=ev.pageX-winId_.offsetLeft/2+"px";winId_.style.top=ev.pageY-winId_.offsetTop/2+"px";})}
+    }
+
+    /*win1.onclick=function(e){console.log(e.pageX,e.pageY)}*/
+
+    let win0_=new DraggableWin(win0,win0trigger);/*進数*/
+    let win1_=new DraggableWin(win1,win1trigger);/*モールス*/
+    let win2_=new DraggableWin(win2,win2trigger);
+
+    win0_.winPc();win0_.winMb();
+    win1_.winPc();win1_.winMb();
+    win2_.winPc();win2_.winMb();
+
+    if(window.matchMedia('(max-width:767px)').matches){console.log("スマホ")}
+    else if(window.matchMedia('(min-width:768px)').matches){console.log("PC")}
+
+
+</script>
+</body>
+</html>
